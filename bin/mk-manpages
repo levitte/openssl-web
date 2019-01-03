@@ -27,14 +27,10 @@ use Pod::Usage qw(pod2usage);
 
 __PACKAGE__->run(@ARGV);
 
-sub Releases { return (qw(master 1.1.0 1.0.2)); }
-sub Sections { return (qw(apps crypto ssl)); }
-
-sub getRelease {
-    my ( $class, $ver ) = @_;
-    my %known = map { $_ => 1 } $class->Releases;
-    return @_ != 2 ? %known : defined $known{$ver} ? $ver : undef;
-}
+sub Dirs { return (qw(apps crypto ssl
+		      man1 man3 man5 man7)) }
+sub Dir2Section { return ( apps => 1, crypto => 3, ssl => 3,
+			   man1 => 1, man3 => 3, man5 => 5, man7 => 7 ) }
 
 sub run {
     my ( $class, @argv ) = @_;
@@ -64,7 +60,7 @@ sub main {
               or $class->die("Can't open $outfile: $!");
             print $fh $out or $class->die("Can't print $outfile: $!");
             close($fh) or $class->die("Can't close $outfile: $!");
-            my @altnames = $class->getnames( $filename, $basename );
+            my %data = $class->getdata( $filename, $basename );
 
             foreach my $alt (@altnames) {
                 my $target = File::Spec->catfile( $wwwdir, "man$release", $sect,
@@ -107,10 +103,15 @@ sub genhtml {
     return $out;
 }
 
-# Return all the OTHER names in a manpage
-sub getnames {
+# Return diverse data from a manpage, currently:
+# {
+#    names       => [ ... ]		# list of all OTHER names
+#    description => "text"		# the short description from NAME
+#    section     => n			# the section number
+# }
+sub getdata {
     my ( $class, $infile, $basename ) = @_;
-    my @words = ();
+    my %data = ();
     open( my $fh, "<", $infile ) or $class->die("Can't open $infile: $!");
     {
         local $/ = "";
@@ -239,33 +240,8 @@ sub htmlHeader {
 EOFH
 }
 
-# note: links could be bogus if file DNE in one of the other releases
-sub htmlSidebar {
-    my ( $class, $release, $section, $file ) = @_;
-
-    my $lirel = "";
-    foreach my $v ( grep { $release ne $_ } $class->Releases ) {
-        $lirel .=
-"\n<li><a href=\"/docs/man$v/$section/$file.html\">$v version</a></li>";
-    }
-
-    return <<EOS;
-<aside class="sidebar">
-  <section>
-    <h1><a href="/docs/manpages.html">$release manpages</a></h1>
-    <ul>
-      <li><a href="../apps/openssl.html">The openssl command</a></li>
-      <li><a href="../ssl/ssl.html">The ssl library</a></li>
-      <li><a href="../crypto/crypto.html">The crypto library</a></li>$lirel
-    </ul>
-  </section>
-</aside>
-EOS
-}
-
 sub htmlFooter {
     my ( $class, $release, $section, $file ) = @_;
-    my $sidebar = $class->htmlSidebar( $release, $section, $file );
     return <<EOFT;
             </p>
           </div>
@@ -280,7 +256,17 @@ sub htmlFooter {
           </footer>
         </article>
       </div>
-      $sidebar
+      <aside class="sidebar">
+        <section>
+          <h1><a href="/docs/man$release.html">$release manpages</a></h1>
+          <ul>
+            <li><a href="../apps/openssl.html">The openssl command</a></li>
+            <li><a href="../ssl/ssl.html">The ssl library</a></li>
+            <li><a href="../crypto/crypto.html">The crypto library</a></li>
+          </ul>
+        </section>
+        <!--#include virtual="/inc/mansidebar.shtml" -->
+      </aside>
     </div>
   </div>
   <!--#include virtual="/inc/footer.shtml" -->
