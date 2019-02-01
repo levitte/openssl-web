@@ -63,6 +63,7 @@ document.  A brief (summary) definition is provided.
     components.
 *   The **Core** is a component in libcrypto that enables applications
     to access the algorithm implementations offered by providers.
+*   **CSP** is Critical Security Parameters.
 *   **Explicit Fetch** is a method for finding an algorithm
     implementation where the application makes an explicit call to
     locate the implementation and supplies search criteria.
@@ -80,6 +81,7 @@ document.  A brief (summary) definition is provided.
 *   The **Integrity Check** is a test that is automatically run when
     the FIPS module is loaded. The module checksums itself and
     verifies that it hasn't been inadvertently altered.
+*   **KAS** is Key Agreement Scheme.
 *   **KAT**s are Known Answer Tests. A set of tests used to perform a
     health-check of a FIPS module.
 *   **libcrypto** is a shared library implemented by OpenSSL that
@@ -1711,10 +1713,10 @@ The parameter passed into each of these tests is KAT data.
 disallows certain algorithms and key lengths after certain dates.
 Security strengths are associated with these items.
 
-Algorithms with ≥ 112 bits of security strength are allowed.
+Algorithms with at least 112 bits of security strength are allowed.
 
-For signature verification, security strengths of ≥ 80 and < 112 are
-allowed for legacy purposes.
+For signature verification, security strengths of at least 80 and
+below 112 are allowed for legacy purposes.
 
 These two values could be defined and enforced in the FIPS module for
 keys, or it can be handled more simply in the Security Policy
@@ -1747,7 +1749,6 @@ cryptographic module.
     Outstanding work is to plumb this into the FIPS module. The
     provider(s) should have the logic that enforces the key size
     limits.
-
 *   A pairwise consistency test (Conditional Self Test) is required
     for RSA, DSA & ECDSA key pair generation. As the purpose of keys
     is not known during key generation,
@@ -1767,6 +1768,12 @@ cryptographic module.
 
     ```
 
+#### DH Key Generation {#dh-key-generation}
+
+*   DH Key generation - This could possibly be broken up so that it
+    matches the standard steps. It is currently a fairly complex
+    monolithic function that is also used for validation.
+
 #### Key Validation {#key-validation}
 
 
@@ -1775,9 +1782,6 @@ cryptographic module.
     Key validation - public key, private key and key-pair checks that
     conform to the standard have been added to
 	[PR #6652](https://github.com/openssl/openssl/pull/6652). 
-*   DH Key generation - This could possibly be broken up so that it
-    matches the standard steps. It is currently a fairly complex
-    monolithic function that is also used for validation.
 *   DH key validation checks need to be checked that they match the
     standard.
 *   EC key validation matches the standards checks.
@@ -1796,8 +1800,8 @@ For KAS DH Params - two types are supported:
 
     Only the above safe primes can be validated - any others should fail.
 
-    Safe primes can be used for security strengths ≥ 112 bits. FIPS
-    specific checks to validate the group may be required.
+    Safe primes can be used for security strengths of at least 112
+	bits. FIPS specific checks to validate the group may be required.
 
 2.  [FIPS 186-4](https://csrc.nist.gov/publications/detail/fips/186/4/final)
     param sets can be used for backwards compatibility with security
@@ -1837,8 +1841,8 @@ pairs i.e.
     module. The module must ensure that when the counter is exhausted
     an error is returned.
 *   For a given key (for any IV length) the total number of
-    invocations of the authenticated encryption function must be <
-    2^32^.
+    invocations of the authenticated encryption function must be less
+    than 2^32^.
 *   A loss of power to the module should not cause the repetition of IVs.
 
 The Random Construction method for IV generation
@@ -1886,7 +1890,7 @@ The generate code would look like the following:
     	if (gctx->ivlen < 12)\
         	    return -1;\
     	/* Use DRBG to generate random iv */ \
-    	if (RAND_bytes(gctx->iv + offset, gctx->ivlen - offset) <= 0)\
+        if (RAND_bytes(gctx->iv + offset, sz) <= 0)\
         	    return -1;\
     	gctx->iv_set = 1;\
     }
