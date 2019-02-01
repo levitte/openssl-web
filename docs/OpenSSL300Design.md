@@ -435,7 +435,7 @@ Names are required for algorithms, parameters, and properties. In
 order to ensure consistency and to enable external Provider
 implementers to define new names in a consistent way there will be a
 registry of recommended or used names. It will be maintained
-separately from the sources..
+separately from the sources.
 
 The ability to define aliases for names is required because there are
 contexts where there are more than one name for the same thing
@@ -446,7 +446,7 @@ thing).
 
 Algorithm implementations (cryptographic and non-cryptographic) will
 have some properties which will be used to select an implementation
-from amongst those available.  For 3.0, two properties are defined:
+from amongst those available. For 3.0, two properties are defined:
 
 *   _is this implementation the default implementation?_
 *   _is this implementation FIPS validated_? 
@@ -849,6 +849,22 @@ _init_, _update_, _final _ functions for encryption. The set of
 functions is determined by the implementation of the upper-level EVP
 code.
 
+Operations are identified by a unique number. For example:
+
+
+```
+#define OSSL_OP_DIGEST                     1
+#define OSSL_OP_SYM_ENCRYPT                2
+#define OSSL_OP_SEAL                       3
+#define OSSL_OP_DIGEST_SIGN                4
+#define OSSL_OP_SIGN                       5
+#define OSSL_OP_ASYM_KEYGEN                6
+#define OSSL_OP_ASYM_PARAMGEN              7
+#define OSSL_OP_ASYM_ENCRYPT               8
+#define OSSL_OP_ASYM_SIGN                  9
+#define OSSL_OP_ASYM_DERIVE               10
+```
+
 For a provider to make an algorithm usable by libcrypto, it must
 register an operation querying callback, which returns an array of
 implementation descriptors, given an operation identity:
@@ -870,24 +886,11 @@ form of parameters as specified in
 provider, such as:
 
 
-
 *   version number
 *   Build strings - as per the current OpenSSL related build
     information (only at the provider level)
 *   Provider name
 
-```
-#define OSSL_OP_DIGEST                     1
-#define OSSL_OP_SYM_ENCRYPT                2
-#define OSSL_OP_SEAL                       3
-#define OSSL_OP_DIGEST_SIGN                4
-#define OSSL_OP_SIGN                       5
-#define OSSL_OP_ASYM_KEYGEN                6
-#define OSSL_OP_ASYM_PARAMGEN              7
-#define OSSL_OP_ASYM_ENCRYPT               8
-#define OSSL_OP_ASYM_SIGN                  9
-#define OSSL_OP_ASYM_DERIVE               10
-```
 
 An individual operation may require multiple function callbacks to be
 defined in order to implement the operation. Each function will be
@@ -1260,10 +1263,10 @@ algorithm might be selected and invoked from the default provider.
 Note that each EVP layer call is implemented by thin wrappers in the
 EVP layer, which invoke similarly named functions within the provider
 on an algorithm by algorithm basis. The specific provider functions to
-be used will be looked up in the OpenSSL Dispatcher tables via an
-explicit `EVP_MD_fetch()` call that specifies the NID and any other
-relevant properties. The returned "md" object contains function
-pointers to the implementation of the algorithm in the selected
+be used will be looked up in the Core Dispatcher tables via an
+explicit `EVP_MD_fetch()` call that specifies the message digest name as a
+string and any other relevant properties. The returned "md" object contains
+function pointers to the implementation of the algorithm in the selected
 provider.
 
 The `EVP_MD_CTX` object is not passed through to the provider since we
@@ -1592,7 +1595,7 @@ FIPS-using application runs) as well as algorithm KATs (which can be
 run once at installation time).
 
 The POST tests run during the call to the FIPS modules
-OSSL_provider_init() entry point.
+`OSSL_provider_init()` entry point.
 
 In order to implement the Integrity Test and KAT in the proper order,
 the module needs access to the following data items:
@@ -1626,13 +1629,13 @@ DEP ensure the tests are run, but allows us to implement the tests
 when the rest of the module is being initialized during normal
 operation.
 
-As part of the build process the integrity checksum of the fips module
+As part of the build process the integrity checksum of the FIPS module
 must be saved to a file. This could be done as a script.  It is just a
-HMAC_SHA256  of the entire fips module file with a known fixed key. If
+HMAC_SHA256  of the entire FIPS module file with a known fixed key. If
 the library is signed then the checksum would have to be calculated
 after the signature is applied.
 
-A fixed key of at least 112 bits will be embedded in the fips module
+A fixed key of at least 112 bits will be embedded in the FIPS module
 for all HMAC integrity operation(s), this key will also be made
 available to the external build script.
 
@@ -1642,7 +1645,7 @@ them fail.
 #### Integrity Checksum Location {#integrity-checksum-location}
 
 The integrity checksum will be saved into a seperate file during
-installation. This file will be in the same location as FIPS module
+installation. This file will be in the same location as the FIPS module
 itself by default, but may be configured to be in a different
 location.
 
@@ -1694,7 +1697,7 @@ indirectly. Lower level API's will still be required to set up keys
 a separate function.
 
 An init method  that sets up any required dependencies for the high
-level functions. Will be required i.e. `set_cpuid` may need to be
+level functions will be required i.e. `set_cpuid` may need to be
 called before doing primitive calls.
 
 API's for different types of self tests should be provided for
@@ -1809,7 +1812,7 @@ For KAS DH Params - two types are supported:
 If both types need to be supported then different key validation code
 will be required.
 
-The existing DH_Check() will require fips specific checks for the
+The existing `DH_Check()` will require FIPS specific checks for the
 approved types.
 
 Keygen is the same for both (the security strength and max bitlen of
@@ -1977,7 +1980,7 @@ justification is required from the lab.
 
 *   The `uninstantiate()` needs to demonstrate that the internal state
     has been zeroized.
-*   Failure testing requires a stick function for DRBG's (see old fips
+*   Failure testing requires a stick function for DRBG's (see old FIPS
     module).
 
 #### Other Items to Consider {#other-items-to-consider}
@@ -2074,8 +2077,8 @@ will verify that the implementation `OSSL_PROVIDER` object for that
 algorithm is the same as its own `OSSL_PROVIDER` object (i.e. the one
 that was passed to `OSSL_provider_init`). For example consider the
 case of an `EVP_DigestSign*` using RSA and SHA256. Both algorithms
-will be looked up externally to the FIPS module using the OpenSSL
-Dispatcher. The RSA signing algorithm is the first entry point and the
+will be looked up externally to the FIPS module using the
+Core. The RSA signing algorithm is the first entry point and the
 "init" call will be passed references to the SHA256 algorithm to be
 used. The FIPS module implementation will check that the
 `OSSL_PROVIDER` object associated that the SHA256 implementation that
@@ -2116,7 +2119,7 @@ using the public data structure defined in
 [Appendix 2 - OpenSSL parameter passing](#appendix-2---openssl-parameter-passing).
 
 The encoded digest OIDs used for **RSA PKCS #1 padding** will either
-be pre-generated (as was done in the old FOM using the SHA_DATA macro)
+be pre-generated (as was done in the old FIPS module using the SHA_DATA macro)
 or generated on demand using a simple function that only generates
 encoded OIDs for the small set of digests supported by PKCS #1
 padding. These digest OIDs occur in the "OID tree" under a common
@@ -2131,7 +2134,7 @@ padding; no DER parsing/decoding is required.
 ### Source code structure/tree clean-up {#source-code-structure-tree-clean-up}
 
 Cryptographic implementations (`crypto/evp/e_*.c` and most of
-`crypto/evp/m_*.c`; essentially any code that defines a `EVP_CIPHER`,
+`crypto/evp/m_*.c`; essentially any code that defines an `EVP_CIPHER`,
 `EVP_MD`, `EVP_PKEY_METHOD`, `EVP_MAC`, or `EVP_KDF`) must move out of
 the evp directory.  They will all end up being part of one or two
 providers, so they should end up in a provider specific sub-tree.
@@ -2207,14 +2210,14 @@ the FIPS provider via the EVP layer.
 
 Any special case code needed to return intermediate values (say for
 CAVS key generation), to display info (self test states), or change
-the normal flow of fips module code (e.g - self test failure or
+the normal flow of FIPS module code (e.g - self test failure or
 failing a keygen loop that supplies fixed rand values) will be
-controlled by embedding callbacks into the fips module code.
+controlled by embedding callbacks into the FIPS module code.
 
 It is recommended that this callback code would be conditionally
 compiled into the module, since some of the values should not be
 returned (e.g- intermediate values in keygen are not supposed to be
-output by the fips module).
+output by the FIPS module).
 
 rand_bytes() will be overridden for tests that require fixed
 rand_bytes to be used.
@@ -2223,7 +2226,7 @@ rand_bytes to be used.
 
 
 The application can optionally supply a single callback function that
-can be used to process values received from the fips module. (Multiple
+can be used to process values received from the FIPS module. (Multiple
 callbacks could be registered if this is required).
 
 The optional application callback would be of the form:
@@ -2236,14 +2239,14 @@ static int fips_test_callback(const char *type, void *arg)
 ```
 
 The return value can be used to control flow in special cases inside
-the fips module code.
+the FIPS module code.
 
-The type is passed in from the fips module hook. Each different hook
-in the fips module should have  a unique type. The type determines
+The type is passed in from the FIPS module hook. Each different hook
+in the FIPS module should have  a unique type. The type determines
 what the arg param contains (either a struct (e.g- intermediate
 values), a name, or int.
 
-The callback in the fips module will be of the form
+The callback in the FIPS module will be of the form
 
 ``` C
 MY_STRUCT  data;   /* values that need to be returned to the application */
@@ -2284,9 +2287,9 @@ Where:
 
 ### CAVS Testing {#cavs-testing}
 
-Cavs testing will be performed by the lab.
+CAVS testing will be performed by the lab.
 
-However each cavs tests file could also be sampled and added to the
+However each CAVS tests file could also be sampled and added to the
 unit tests. This would mean converting the file data of a single test
 into binary data inside a unit test.
 
@@ -2296,8 +2299,8 @@ This will ensure the following:
 
 
 
-*   The required interfaces will be available to the cavs tests (some
-    cavs tests require access to internals, that are not normally
+*   The required interfaces will be available to the CAVS tests (some
+    CAVS tests require access to internals, that are not normally
     needed).
 *   That the algorithm works.
 *   Coverage.
@@ -2310,7 +2313,8 @@ labs finds missing accessors for internals.
 
 ### EVP to low level API bridges {#evp-to-low-level-api-bridges}
 
-The impact on the public `EVP_PKEY` is that it will have to keep a
+There are places where low level API structures are assigned to an `EVP_PKEY`
+object. The impact on the public `EVP_PKEY` is that it will have to keep a
 pointer to a possible low level structure and the type of that low
 level structure must be known internally in `libcrypto`.  Any time the
 `EVP_PKEY` with such a pointer is used for any computation, it must
@@ -2558,7 +2562,7 @@ following items:
 *   The size of the value
 *   The value itself
 
-Any parameter that are used to request values _from_ a module will
+Any parameters that are used to request values _from_ a module will
 need the following items:
 
 *   An identifier to indicate what is being requested
@@ -2636,7 +2640,7 @@ This specification supports the following parameter types:
 *   `UNSIGNED_INTEGER`
     *   These are arbitrary length and may therefore require an
         arbitrarily sized buffer.
-    *   The number is store in native form, i.e. MSB first on big
+    *   The number is stored in native form, i.e. MSB first on big
         endian systems and LSB first on little endian systems.  This
         means that arbitrary native integers can be stored in the
         buffer, just make sure that the buffer size is correct and
@@ -2715,7 +2719,7 @@ cookie = 0
 ```
 
 The Core side provider structure for the provider "foo" could then
-answer to these request parameter keys:
+answer to these requested parameter keys:
 
 *   `"provider_id"` (value is `"myfoo"`)
 *   `"module_path"` (value is `"/usr/share/openssl/providers/foo.so"`)
