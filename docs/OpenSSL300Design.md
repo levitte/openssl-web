@@ -131,18 +131,18 @@ The architecture shall have the following features:
     an algorithm. This release will include the following providers:
     a.  Default, which contains the current non-legacy OpenSSL
         cryptographic algorithms; this will be built-in (i.e., part of
-		libcrypto) 
+        libcrypto)
     b.  Legacy, with implementations of older algorithms (e.g, DES,
-		MDC2, MD2, Blowfish, CAST) 
+        MDC2, MD2, Blowfish, CAST)
     c.  Engines, which include a compatibility layer between engines
-		designed for older versions of OpenSSL, and the new Provider
-		based approach. 
+        designed for older versions of OpenSSL, and the new Provider
+        based approach.
     d.  FIPS, which implements the OpenSSL FIPS Cryptographic Module
-        3.0; this can be loaded dynamically at runtime. 
+        3.0; this can be loaded dynamically at runtime.
 *   The Core enables access to the operations offered by providers to
     applications (and other providers). The Core is the mechanism via
     which concrete implementations of operations are located.
-*   Protocol implementations. E.g. TLS, DTLS. 
+*   Protocol implementations. E.g. TLS, DTLS.
 
 This document has many references to the "EVP API." This refers to
 "application-level" operations, such as public-key signing, generating
@@ -202,10 +202,10 @@ here are as follows:
     *   KAT: Known Answer Tests
     *   Integrity Check
     *   Low Level Implementations: This is the set of components that
-	    actually implement the cryptographic primitives (to meet the
-	    FIPS-mandated self-contained requirement).
+        actually implement the cryptographic primitives (to meet the
+        FIPS-mandated self-contained requirement).
 *   Engines Provider: A shim that allows existing engines to work
-	when called via the Core.
+    when called via the Core.
 *   Legacy Provider: Provides implementations of older algorithms that
     will be exposed via EVP-level APIs.
 *   3rd Party Providers: Eventually, third-parties may provide their
@@ -324,9 +324,9 @@ follows:
 
 
 1.  Every provider needs to be loaded. This will happen implicitly
-	(default provider or specified via configuration) and may also be
-	explicitly requested by the application. Load encompases both
-	dynamic shared object loading (as needed) and initialisation.
+    (default provider or specified via configuration) and may also be
+    explicitly requested by the application. Load encompases both
+    dynamic shared object loading (as needed) and initialisation.
     1.  The Core physically loads the module into memory (not required
         if default provider is already in memory).
     2.  The Core calls the provider's entry point for the provider to
@@ -451,7 +451,7 @@ have some properties which will be used to select an implementation
 from amongst those available. For 3.0, two properties are defined:
 
 *   _is this implementation the default implementation?_
-*   _is this implementation FIPS validated_? 
+*   _is this implementation FIPS validated_?
 
 The valid input and their meaning are:
 
@@ -651,7 +651,7 @@ there is a conflict, specifically:
 ### Provider Module Loading {#provider-module-loading}
 
 
-Providers can either be built-in or dynamically loadable modules. 
+Providers can either be built-in or dynamically loadable modules.
 
 All algorithms are implemented by providers. The OpenSSL Core will
 initially have no providers loaded, and therefore will have no
@@ -877,7 +877,7 @@ implementation descriptors, given an operation identity:
 So for example, this query callback will return the list of all its
 digests if the given operation is `OSSL_OP_DIGEST`.
 
-Algorithms are identified by a string. 
+Algorithms are identified by a string.
 
 The Core provides a set of services for the provider to use in the
 form of a function table.
@@ -924,7 +924,7 @@ multi-part operations:
 #define OSSL_OP_DIGEST_FUNC                6
 typedef int (*OSSL_OP_digest)(const OSSL_PROVIDER *prov,
                               const void *data, size_t len,
-                      	      unsigned char *md, size_t mdsize,
+                              unsigned char *md, size_t mdsize,
                               size_t *outlen);
 ```
 
@@ -1119,7 +1119,7 @@ EVP_CIPHER_free(ciph);                                                /* <=== */
 ```
 
 
-An application may wish to use algorithms from a different provider. 
+An application may wish to use algorithms from a different provider.
 
 For example, consider the scenario where an application wishes to use
 some algorithms from the FIPS provider, but still use the default
@@ -1478,15 +1478,15 @@ We will require the following:
 
     Failing a self test can be triggered by:
 
-	1.  Continuous tests (key pair gen pairwise test (sign/verify) and
+    1.  Continuous tests (key pair gen pairwise test (sign/verify) and
         random number compare test from entropy source to verify
         random number inputs into the DRBG are not the same).
-	2.  DRBG health tests - this can be made to cause an error always
+    2.  DRBG health tests - this can be made to cause an error always
         just in the RNG (rather than setting a global error
         state)[^1].
-	3.  POST Integrity test failure either at install, startup, or on
+    3.  POST Integrity test failure either at install, startup, or on
         demand.
-	4.  POST KAT failure at startup, or on demand.
+    4.  POST KAT failure at startup, or on demand.
 
     An internal API will be supplied to set the failure state for the above cases.
 
@@ -1665,26 +1665,26 @@ another test then it does not need separate tests. Here is the list of
 algorithms that 'need' to be tested.
 
 *   Cipher encrypt/decrypt
-	*   AES_128_GCM[^2]
-	*   TDES_CBC
+    *   AES_128_GCM[^2]
+    *   TDES_CBC
 *   Digests
-	*   SHA1
-	*   _SHA256 is required but tested elsewhere_
-	*   SHA512
-	*   SHA3-256
+    *   SHA1
+    *   _SHA256 is required but tested elsewhere_
+    *   SHA512
+    *   SHA3-256
 *   Sign/Verify tests
-	*   DSA_2048
-	*   RSA_SHA256 (with PKCS #1 v1.5 padding)
-	*   ECDSA P256
+    *   DSA_2048
+    *   RSA_SHA256 (with PKCS #1 v1.5 padding)
+    *   ECDSA P256
 *   DRBG Health Tests for any supported DRBG mechanisms
-	*   CTR (AES_128_CTR)
-	*   HASH - SHA256[^3]
-	*   HMAC - SHA256
+    *   CTR (AES_128_CTR)
+    *   HASH - SHA256[^3]
+    *   HMAC - SHA256
 *   Derived Tests (Compute Z)
-	*   ECDSA P256
-	*   ECDH
+    *   ECDSA P256
+    *   ECDH
 *   KDF's
-	*   KBKDF (HKDF for TLS)
+    *   KBKDF (HKDF for TLS)
 
 Note: HMAC-SHA-256 is used by the integrity test, so there is no need
 for a seperate HMAC test.
@@ -1737,8 +1737,8 @@ cryptographic module.
 
 *   Compute key methods - These already exist. (e.g `DH_compute_key()`).
 *   Key Generation - (RSA
-	[FIPS 186-4](https://csrc.nist.gov/publications/detail/fips/186/4/final)
-	Keygen is currently missing).
+    [FIPS 186-4](https://csrc.nist.gov/publications/detail/fips/186/4/final)
+    Keygen is currently missing).
 *   Key Validation - (Mostly implemented).
 
 #### FIPS 186-4 RSA Key Generation {#fips-186-4-rsa-key-generation}
@@ -1752,16 +1752,16 @@ cryptographic module.
 *   A pairwise consistency test (Conditional Self Test) is required
     for RSA, DSA & ECDSA key pair generation. As the purpose of keys
     is not known during key generation,
-	[FIPS 140-2 IG](https://csrc.nist.gov/csrc/media/projects/cryptographic-module-validation-program/documents/fips140-2/fips1402ig.pdf)
+    [FIPS 140-2 IG](https://csrc.nist.gov/csrc/media/projects/cryptographic-module-validation-program/documents/fips140-2/fips1402ig.pdf)
     states that the same pairwise tests can be used for both modes
-    i.e Signatures and Encryption. 
+    i.e Signatures and Encryption.
 *   1024 bit keys are not allowed for RSA key generation.
 *   The Key generation algorithms have the concept of a
     target_security_strength. i.e- the code in key generation needs
     the following check for RSA for example
 
     ``` C
-    if (target_strength < 112 
+    if (target_strength < 112
         || target_strength > 256
         || BN_security_bits(nbits) < target_strength)
         return 0;
@@ -1778,10 +1778,10 @@ cryptographic module.
 
 
 *   RSA
-	[SP 800-56B](https://csrc.nist.gov/publications/detail/sp/800-56b/rev-1/final)
+    [SP 800-56B](https://csrc.nist.gov/publications/detail/sp/800-56b/rev-1/final)
     Key validation - public key, private key and key-pair checks that
     conform to the standard have been added to
-	[PR #6652](https://github.com/openssl/openssl/pull/6652). 
+    [PR #6652](https://github.com/openssl/openssl/pull/6652).
 *   DH key validation checks need to be checked that they match the
     standard.
 *   EC key validation matches the standards checks.
@@ -1790,7 +1790,7 @@ cryptographic module.
 
 For KAS DH Params - two types are supported:
 
-1.  Approved Safe Prime groups given by the following: 
+1.  Approved Safe Prime groups given by the following:
 
     (where g=2, q=(p-1)/2, priv=[1, q-1], pub=[2, p-2])
 
@@ -1801,17 +1801,17 @@ For KAS DH Params - two types are supported:
     Only the above safe primes can be validated - any others should fail.
 
     Safe primes can be used for security strengths of at least 112
-	bits. FIPS specific checks to validate the group may be required.
+    bits. FIPS specific checks to validate the group may be required.
 
 2.  [FIPS 186-4](https://csrc.nist.gov/publications/detail/fips/186/4/final)
     param sets can be used for backwards compatibility with security
     strength of 112 bits only. The groups are
 
-	FB (2048, 224) &
+    FB (2048, 224) &
 
-	FC (2048, 256).
+    FC (2048, 256).
 
-	This requires the seed and counter to be saved for validation purposes.
+    This requires the seed and counter to be saved for validation purposes.
 
 If both types need to be supported then different key validation code
 will be required.
@@ -1883,16 +1883,16 @@ The generate code would look like the following:
 ``` C
 #define AES_GCM_IV_GENERATE(gctx, offset) \
     if (!gctx->iv_set) {\
-    	int sz = gctx->ivlen - offset;\
-    	if (sz <= 0)\
-        	    return -1;\
-    	/* Must be at least 96 bits */\
-    	if (gctx->ivlen < 12)\
-        	    return -1;\
-    	/* Use DRBG to generate random iv */ \
+        int sz = gctx->ivlen - offset;\
+        if (sz <= 0)\
+                return -1;\
+        /* Must be at least 96 bits */\
+        if (gctx->ivlen < 12)\
+                return -1;\
+        /* Use DRBG to generate random iv */ \
         if (RAND_bytes(gctx->iv + offset, sz) <= 0)\
-        	    return -1;\
-    	gctx->iv_set = 1;\
+                return -1;\
+        gctx->iv_set = 1;\
     }
 ```
 
@@ -1906,7 +1906,7 @@ specified as a security policy item.
 
 The security policy would also need to state the following: (See
 [FIPS 140-2 IG](https://csrc.nist.gov/csrc/media/projects/cryptographic-module-validation-program/documents/fips140-2/fips1402ig.pdf)
-A.5) 
+A.5)
 
 
 
@@ -1916,7 +1916,7 @@ A.5)
     than 2^32^.
 *   Scenario 1: IV gen is in compliance with the TLS protocol.
 *   Scenario 2: IV gen using
-	[NIST SP 800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final)
+    [NIST SP 800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final)
     (Section 8.2.2).
 
 ### CSP/Key Zeroization {#csp-key-zeroization}
@@ -1927,7 +1927,7 @@ on the context:
 
 *   Temporary copies of CSPs may be stack or heap allocated, and will
     be zeroized within the relevant function for the scope within
-    which they are used. 
+    which they are used.
 *   Some CSPs will have a lifetime associated with an OpenSSL object
     such as an `EVP_PKEY`, or an `EVP_CIPHER_CTX`. In this case the
     CSPs will be zeroized at the point that these objects are
@@ -1935,7 +1935,7 @@ on the context:
     `EVP_CIPHER_CTX` can be reused for multiple encryption
     operations), in which case any CSPs still present in the object
     will be zeroized at the point that it is reinitialized for the new
-    operation. 
+    operation.
 *   Some CSPs (e.g. internal DRBG state) may live for the entire time
     that the OpenSSL FIPS Module is loaded. In this case the state
     will be encapsulated within OpenSSL objects. All OpenSSL Providers
@@ -1943,15 +1943,15 @@ on the context:
     register an "unload" function which is to be called when OpenSSL
     is closed down (or the module is unloaded for any other
     reason). The objects containing CSPs will be freed (and hence
-    zeroized) by this unload function. 
+    zeroized) by this unload function.
 *   According to
-	[FIPS 140-2 IG](https://csrc.nist.gov/csrc/media/projects/cryptographic-module-validation-program/documents/fips140-2/fips1402ig.pdf)
+    [FIPS 140-2 IG](https://csrc.nist.gov/csrc/media/projects/cryptographic-module-validation-program/documents/fips140-2/fips1402ig.pdf)
     4.7: Cryptographic keys used by a cryptographic module ONLY to perform
     [FIPS 140-2](https://csrc.nist.gov/publications/detail/fips/140/2/final)
-	Section 4.9.1 Power-Up Tests are not considered CSPs and therefore
-	do not need to meet the
-	[FIPS 140-2](https://csrc.nist.gov/publications/detail/fips/140/2/final)
-	Section 4.7.6 zeroization requirements. 
+    Section 4.9.1 Power-Up Tests are not considered CSPs and therefore
+    do not need to meet the
+    [FIPS 140-2](https://csrc.nist.gov/publications/detail/fips/140/2/final)
+    Section 4.7.6 zeroization requirements.
 
 The OpenSSL FIPS Module will contain its own copy of the standard
 `OPENSSL_cleanse()` function to perform the zeroization. This is
@@ -1990,11 +1990,11 @@ justification is required from the lab.
 #### Other Items to Consider {#other-items-to-consider}
 
 *   The DRBG health tests need to occur on the entropy input into the
-    DRBGs.  Refer to: 
-	[Work to do to Complete the Entropy Solution](#work-to-do-to-complete-the-entropy-solution).
+    DRBGs.  Refer to:
+    [Work to do to Complete the Entropy Solution](#work-to-do-to-complete-the-entropy-solution).
 *   The entropy expansion in
-	[NIST SP 800-90C](https://csrc.nist.gov/publications/detail/sp/800-90c/draft)
-	10.1.2 should be considered for implementation.
+    [NIST SP 800-90C](https://csrc.nist.gov/publications/detail/sp/800-90c/draft)
+    10.1.2 should be considered for implementation.
 *   A better DRBG selection mechanism to choose between the available
     DRBGs.
 *   Support for prediction resistance.  I.e. attempt to collect more
@@ -2299,7 +2299,7 @@ into binary data inside a unit test.
 
 (DRBG_ctr is an example that does this already).
 
-This will ensure the following: 
+This will ensure the following:
 
 
 
@@ -2938,7 +2938,7 @@ Security Policy statement regarding the <a href="https://csrc.nist.gov/publicati
    </td>
    <td>✓
    </td>
-   <td>224, 256, 384, 512.  Appear to be compliant. 
+   <td>224, 256, 384, 512.  Appear to be compliant.
    </td>
   </tr>
   <tr>
@@ -3173,7 +3173,7 @@ All comply with <a href="https://csrc.nist.gov/publications/detail/sp/800-90a/re
 [^1]: The output of the DRBGs are not required to be tested because of
     [FIPS 140-2 IG](https://csrc.nist.gov/csrc/media/projects/cryptographic-module-validation-program/documents/fips140-2/fips1402ig.pdf)
     9.8.  However, the seed material being fed into the master DRBG
-    still requires the RCT or stuck bit testing. 
+    still requires the RCT or stuck bit testing.
 
 [^2]: The draft guidance has changed. The alternatives are: AES_GMAC,
     AES_128_CCM, AES_256_GCM and AES_256_CCM.  GMAC is arguably the
