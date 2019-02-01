@@ -983,10 +983,10 @@ static int fips_query_operation(const OSSL_PROVIDER *provider,
     return *map != NULL;
 }
 
-#define param_set_string(o,s) do { \
-    (o)->buffer = (s); \
-    (o)->data_type = OSSL_PARAM_UTF8_STRING_PTR; \
-    if ((o)->result_size != NULL) *(o)->result_size = sizeof(s); \
+#define param_set_string(o,s) do {                                  \
+    (o)->buffer = (s);                                              \
+    (o)->data_type = OSSL_PARAM_UTF8_STRING_PTR;                    \
+    if ((o)->result_size != NULL) *(o)->result_size = sizeof(s);    \
 } while(0)
 static int fips_get_parms(const OSSL_PROVIDER *provider,
                           OSSL_PARAM *outparams)
@@ -1881,18 +1881,18 @@ project.
 The generate code would look like the following:
 
 ``` C
-#define AES_GCM_IV_GENERATE(gctx, offset) \
-    if (!gctx->iv_set) {\
-        int sz = gctx->ivlen - offset;\
-        if (sz <= 0)\
-                return -1;\
-        /* Must be at least 96 bits */\
-        if (gctx->ivlen < 12)\
-                return -1;\
-        /* Use DRBG to generate random iv */ \
-        if (RAND_bytes(gctx->iv + offset, sz) <= 0)\
-                return -1;\
-        gctx->iv_set = 1;\
+#define AES_GCM_IV_GENERATE(gctx, offset)                   \
+    if (!gctx->iv_set) {                                    \
+        int sz = gctx->ivlen - offset;                      \
+        if (sz <= 0)                                        \
+            return -1;                                      \
+        /* Must be at least 96 bits */                      \
+        if (gctx->ivlen < 12)                               \
+            return -1;                                      \
+        /* Use DRBG to generate random iv */                \
+        if (RAND_bytes(gctx->iv + offset, sz) <= 0)         \
+            return -1;                                      \
+        gctx->iv_set = 1;                                   \
     }
 ```
 
